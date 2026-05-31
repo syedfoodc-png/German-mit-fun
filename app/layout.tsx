@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Head from "next/head"; // <-- ye line add kar
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,23 +24,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <Head>
-        
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-EFJV4ZLZT6"></script>
-        <script dangerouslySetInnerHTML={{
-          __html: `
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex-col">
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-EFJV4ZLZT6"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments)}
             gtag('js', new Date());
             gtag('config', 'G-EFJV4ZLZT6');
-          `
-        }} />
-      </Head>
-      <body className="min-h-full flex-col">{children}</body>
+          `}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }
