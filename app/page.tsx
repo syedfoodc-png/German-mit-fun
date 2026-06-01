@@ -1,6 +1,6 @@
 'use client';
+import React, { useState, useEffect } from 'react';
 
-import { useState, useEffect } from 'react';
 import Lesson0 from '../components/lesson0';
 import Lesson1 from '../components/lesson1';
 import Lesson2 from '../components/lesson2';
@@ -73,12 +73,9 @@ export default function Home() {
 
   // Lesson component kholne ka logic
   if (view === 'lesson') {
-    const CurrentLesson = a1Lessons[activeLessonIndex];
-    return (
-      <CurrentLesson onComplete={handleLessonComplete} />
-    );
-  }
-
+  const CurrentLesson = a1Lessons[activeLessonIndex];
+  return React.createElement(CurrentLesson, { onComplete: () => handleLessonComplete(10) });
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
 
@@ -184,7 +181,7 @@ export default function Home() {
                       : ''
                   } ${
                     isCurrent
-                     ? 'bg-cyan-500/20 border-cyan-500/50 cursor-pointer hover:scale-105 animate-pulse shadow-cyan-500/50'
+                     ? 'bg-cyan-500/20 border-cyan-500/50 cursor-pointer hover:scale-105 animate-pulse shadow-lg shadow-cyan-500/50'
                       : ''
                   } ${
                     isLocked
