@@ -83,6 +83,7 @@ const levels = {
 };
 
 export default function Home() {
+  const [score, setScore] = useState(0);
   const [view, setView] = useState<'levels' | 'lessons' | 'lesson' | 'certificate'>('levels');
   const [activeLevel, setActiveLevel] = useState('A1');
   const [activeLesson, setActiveLesson] = useState(0);
@@ -119,7 +120,7 @@ export default function Home() {
 
   // Certificate View
   if (view === 'certificate') {
-    return <Certificate onBack={() => setView('lessons')} />;
+    return <Certificate score={0} onClose={() => setView('lessons')} />;
   }
 
   // Lessons View
