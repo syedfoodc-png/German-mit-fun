@@ -184,7 +184,7 @@ export default function Home() {
                       : ''
                   } ${
                     isCurrent
-                     ? 'bg-cyan-500/20 border-cyan-500/50 cursor-pointer hover:scale-105 animate-pulse shadow-[0_0_30px_rgba(56,189,248,0.5)]'
+                     ? 'bg-cyan-500/20 border-cyan-500/50 cursor-pointer hover:scale-105 animate-pulse shadow-cyan-500/50'
                       : ''
                   } ${
                     isLocked
