@@ -1,86 +1,50 @@
-'use client';
-import { useRef } from 'react';
-
-export default function Certificate({ score, onClose }: { score: number; onClose: () => void }) {
-  const certRef = useRef<HTMLDivElement>(null);
-
-  const downloadCertificate = async () => {
-    const html2canvas = (await import('html2canvas')).default;
-    const canvas = await html2canvas(certRef.current!, { scale: 2 });
-    const link = document.createElement('a');
-    link.download = 'German_A1_Certificate.png';
-    link.href = canvas.toDataURL();
-    link.click();
-  };
-
-  const date = new Date().toLocaleDateString('en-IN', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
-  });
+export default function Certificate({ 
+  score = 0, 
+  onBack, 
+  onClick 
+}: { 
+  score?: number; 
+  onBack?: () => void; 
+  onClick?: () => void;
+}) {
+  // onBack mile to wahi use karega, nahi to onClick use karega
+  const handleBack = onBack || onClick || (() => {});
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="max-w-3xl w-full">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center p-8">
+      <div className="bg-white rounded-3xl p-12 text-center shadow-2xl max-w-md w-full border-8 border-yellow-300">
         
-        {/* Certificate Design */}
-        <div 
-          ref={certRef}
-          className="bg-gradient-to-br from-yellow-50 to-white p-12 rounded-2xl border-8 border-yellow-600 shadow-2xl"
-          style={{ aspectRatio: '1.414' }} // A4 ratio
-        >
-          <div className="text-center border-4 border-yellow-600 p-8 rounded-xl h-full flex-col justify-center">
-            
-            <p className="text-6xl mb-4">🏆</p>
-            <h1 className="text-5xl font-bold text-yellow-700 mb-2">CERTIFICATE</h1>
-            <p className="text-xl text-gray-600 mb-8">OF COMPLETION</p>
-            
-            <p className="text-lg text-gray-700 mb-4">This is to certify that</p>
-            <p className="text-3xl font-bold text-gray-900 mb-4 border-b-2 border-gray-300 pb-2">
-              German Learner
-            </p>
-            <p className="text-lg text-gray-700 mb-8">has successfully completed</p>
-            
-            <h2 className="text-4xl font-bold text-yellow-700 mb-4">GERMAN A1 LEVEL</h2>
-            <p className="text-gray-600 mb-8">Basic German Language Course</p>
-            
-            <div className="flex justify-between items-end mt-auto">
-              <div className="text-left">
-                <p className="text-gray-600 text-sm">Score Achieved</p>
-                <p className="text-2xl font-bold text-green-600">{score}/15</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-32 h-32 bg-yellow-600 rounded-full flex items-center justify-center mb-2">
-                  <p className="text-4xl">✓</p>
-                </div>
-                <p className="text-xs text-gray-600">A1 Verified</p>
-              </div>
-              
-              <div className="text-right">
-                <p className="text-gray-600 text-sm">Date</p>
-                <p className="text-lg font-bold text-gray-900">{date}</p>
-              </div>
-            </div>
-            
+        {/* Trophy Animation */}
+        <div className="text-8xl mb-6 animate-bounce">🏆</div>
+        
+        <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">
+          Level A1 Complete!
+        </h1>
+        
+        <p className="text-slate-600 text-xl mb-2">
+          Congratulations! 🎉
+        </p>
+        
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 mb-8">
+          <p className="text-white text-sm uppercase tracking-wider mb-2">Final Score</p>
+          <p className="text-white text-6xl font-black">{score}</p>
+        </div>
+
+        <div className="bg-slate-100 rounded-2xl p-6 mb-8">
+          <p className="text-slate-700 font-bold text-lg mb-2">You mastered:</p>
+          <div className="text-slate-600 space-y-1">
+            <p>✅ 14 Lessons Completed</p>
+            <p>✅ Basic German Vocabulary</p>
+            <p>✅ Greetings & Numbers</p>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-4 mt-6">
-          <button 
-            onClick={downloadCertificate}
-            className="flex-1 bg-yellow-600 hover:bg-yellow-700 py-4 rounded-xl font-bold text-lg transition"
-          >
-            📥 Download Certificate
-          </button>
-          <button 
-            onClick={onClose}
-            className="px-8 bg-gray-700 hover:bg-gray-600 py-4 rounded-xl font-bold text-lg transition"
-          >
-            Close
-          </button>
-        </div>
+        <button
+          onClick={handleBack}
+          className="w-full bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:scale-105 hover:bg-slate-800 transition-all duration-300 shadow-lg"
+        >
+          Back to Dashboard
+        </button>
       </div>
     </div>
   );
