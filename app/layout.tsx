@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "German mit Fun - A1 Level",
   description: "Free German learning app with TTS",
+  manifest: "/manifest.json", // 👈 YE LINE ADD KAR DI
+  themeColor: "#7c3aed", // 👈 YE BHI ADD
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "GermanFun"
+  }
 };
 
 export default function RootLayout({
