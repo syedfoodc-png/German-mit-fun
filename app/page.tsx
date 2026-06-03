@@ -1,12 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 import { BookOpen, CheckCircle2, XCircle, Volume2, ArrowLeft, AlertCircle } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export default function GermanApp() {
   const [screen, setScreen] = useState('levels')
@@ -14,7 +9,20 @@ export default function GermanApp() {
   const [currentLesson, setCurrentLesson] = useState<any>(null)
   const [selectedLevel, setSelectedLevel] = useState<any>(null)
   const [levels, setLevels] = useState<any[]>([])
+  const [lessons, setLessons] = useState<any[]>([]) // YE MISSING THA
   const [loading, setLoading] = useState(true)
+
+  // BACK BUTTON FUNCTIONS
+  const backToLevels = () => {
+    setScreen('levels')
+    setSelectedLevel(null)
+    setLessons([])
+  }
+
+  const backToLessons = () => {
+    setScreen('lessons')
+    setCurrentLesson(null)
+  }
 
   useEffect(() => {
     fetchLevels()
@@ -23,9 +31,9 @@ export default function GermanApp() {
   const fetchLevels = async () => {
     setLoading(true)
     const { data: levelsData, error: levelError } = await supabase
-    .from('levels')
-    .select('*')
-    .order('order', { ascending: true })
+     .from('levels')
+     .select('*')
+     .order('order', { ascending: true })
 
     if (!levelsData) {
       alert("DB Error: " + levelError?.message)
@@ -36,10 +44,10 @@ export default function GermanApp() {
     const levelsWithLessons = await Promise.all(
       levelsData.map(async (level) => {
         const { data: lessons } = await supabase
-        .from('lessons')
-        .select('id, title, "order"')
-        .eq('level_id', level.id)
-        .order('"order"', { ascending: true })
+         .from('lessons')
+         .select('id, title, "order"')
+         .eq('level_id', level.id)
+         .order('"order"', { ascending: true })
         return {...level, lessons: lessons || [], totalLessons: lessons?.length || 0 }
       })
     )
@@ -50,15 +58,16 @@ export default function GermanApp() {
 
   const openLevel = (level: any) => {
     setSelectedLevel(level)
+    setLessons(level.lessons) // YE IMPORTANT HAI
     setScreen('lessons')
   }
 
-  const openLesson = async (lessonId: string) => {
+  const openLesson = async (lesson: any) => { // lesson object leta hai ab
     const { data, error } = await supabase
-    .from('lessons')
-    .select('content, title')
-    .eq('id', lessonId)
-    .single()
+     .from('lessons')
+     .select('content, title')
+     .eq('id', lesson.id)
+     .single()
 
     if (error) {
       alert("Lesson load error: " + error.message)
@@ -81,110 +90,124 @@ export default function GermanApp() {
     )
   }
 
-  // ===== SCREEN 1: PRO DASHBOARD =====
+  // ===== SCREEN 1: COLORFUL DASHBOARD =====
   if (screen === 'levels') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
+    const levelColors: any = {
+      'A1': 'from-emerald-400 to-teal-500',
+      'A2': 'from-blue-500 to-cyan-500',
+      'B1': 'from-red-500 to-rose-500',
+      'B2': 'from-purple-500 to-pink-500',
+      'C1': 'from-orange-500 to-amber-500',
+      'C2': 'from-gray-600 to-slate-700'
+    }
 
-          {/* CENTERED HEADER */}
-          <div className="text-center mb-12 mt-4">
-            <h1 className="text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-3">
-              German mit Fun
+    const levelEmojis: any = {
+      'A1': '🎯',
+      'A2': '🚀',
+      'B1': '⚡',
+      'B2': '🔥',
+      'C1': '👑',
+      'C2': '💎'
+    }
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10 relative">
+            <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-3">
+              German Mit Fun
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 font-medium mb-4">
-              khelte khelte sikho german 🇩🇪✨
+            <p className="text-xl text-white/80 font-medium mb-4">
+              khelte khelte sikho german 🇩🇪
             </p>
-            <div className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-bold text-xl shadow-xl">
-              {xp} XP
+            <div className="absolute top-0 right-0 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full">
+              <span className="text-white font-bold text-lg">Score: {xp}</span>
             </div>
           </div>
 
-          {/* GLASSMORPHISM CARDS GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {levels.map((level) => (
-              <button
-                key={level.id}
-                onClick={() => openLevel(level)}
-                className="group relative bg-white/70 backdrop-blur-lg rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-white/50 overflow-hidden text-left"
-              >
-                {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {levels.map((level) => {
+              const levelCode = level.title.split(' ')[0]
+              const isUnlocked = level.totalLessons > 0
+              const gradient = levelColors[levelCode] || 'from-gray-500 to-gray-600'
+              const emoji = levelEmojis[levelCode] || '📚'
 
-                {/* Level Badge */}
-                <div className="absolute -top-4 -right-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white w-20 h-20 rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                  {level.title.split(' ')[0]}
-                </div>
-
-                {/* Content */}
-                <div className="relative z-10">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
-                    {level.title}
-                  </h2>
-                  <p className="text-gray-600 mb-4">{level.subtitle}</p>
-                  <div className="flex items-center gap-2 text-purple-600 font-semibold">
-                    <BookOpen size={18} />
-                    <span>{level.totalLessons} Lessons</span>
-                  </div>
-
-                  {/* Progress bar for A1 */}
-                  {level.totalLessons > 0 && level.title.includes('A1') && (
-                    <div className="mt-4 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                      <div className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full w-full" />
-                    </div>
-                  )}
-                </div>
-              </button>
-            ))}
+              return (
+                <button
+                  key={level.id}
+                  onClick={() => isUnlocked && openLevel(level)}
+                  disabled={!isUnlocked}
+                  className={`group relative bg-gradient-to-br ${gradient} rounded-2xl p-8 shadow-2xl transition-all duration-300 text-center ${
+                    isUnlocked? 'hover:scale-105 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] cursor-pointer' : 'opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="text-5xl mb-4">{emoji}</div>
+                  <h2 className="text-4xl font-extrabold text-white mb-2">{levelCode}</h2>
+                  <p className="text-white/90 text-lg font-semibold mb-2">{level.subtitle}</p>
+                  <p className="text-white/70 text-sm">
+                    {isUnlocked? `${level.totalLessons} Lessons` : 'Coming Soon'}
+                  </p>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
     )
   }
 
-  // ===== SCREEN 2: LESSONS LIST =====
-  if (screen === 'lessons' && selectedLevel) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
-        <div className="max-w-4xl mx-auto">
-          <button
-            onClick={() => setScreen('levels')}
-            className="flex items-center gap-2 text-purple-600 font-semibold mb-6 hover:gap-3 transition"
-          >
-            <ArrowLeft size={20} /> Back to Levels
-          </button>
+  // ===== SCREEN 2: COLORFUL LESSON LIST =====
+ // ===== SCREEN 2: LESSON LIST =====
+if (screen === 'lessons') {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 p-6">
+      <div className="max-w-4xl mx-auto">
+        
+        {/* Back Button */}
+        <button onClick={backToLevels} className="mb-6 flex items-center gap-2 text-white/90 hover:text-white font-semibold transition">
+          ← Back to Levels
+        </button>
 
-          <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-8 mb-6">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">{selectedLevel.title}</h2>
-            <p className="text-gray-600">{selectedLevel.subtitle}</p>
-          </div>
+        {/* Header Card */}
+        <div className="bg-white/20 backdrop-blur-md rounded-3xl p-8 mb-8 shadow-2xl border-white/30">
+          <h1 className="text-4xl font-extrabold text-white mb-2">{selectedLevel?.title}</h1>
+          <p className="text-white/80 text-lg">Choose your lesson and start learning!</p>
+        </div>
 
-          <div className="space-y-3">
-            {selectedLevel.lessons.map((lesson: any, idx: number) => (
-              <button
-                key={lesson.id}
-                onClick={() => openLesson(lesson.id)}
-                className="w-full bg-white/90 backdrop-blur-md hover:bg-white border-gray-200 hover:border-purple-300 p-5 rounded-xl font-semibold text-left hover:shadow-lg transition-all duration-200 flex items-center justify-between group"
-              >
+        {/* LESSON CARDS - YAHI WALA BUTTON */}
+        <div className="space-y-4">
+          {lessons.map((lesson, index) => (
+            <button
+              key={lesson.id}
+              onClick={() => openLesson(lesson)}
+              // 👇 YAHI PURANA CLASSNAME HAI - ISE REPLACE KAR DE
+              className="group w-full bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 text-left border-2 border-transparent hover:border-emerald-400"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xl">{index + 1}</span>
+                </div>
                 <div>
-                  <div className="text-gray-400 text-sm mb-1">Lesson {idx + 1}</div>
-                  <div className="text-lg text-gray-800 group-hover:text-purple-600">{lesson.title}</div>
+                  <p className="text-sm text-gray-500 font-medium mb-1">Lesson {index + 1}</p>
+                  <h3 className="text-xl font-bold text-gray-800 group-hover:text-emerald-600 transition">
+                    {lesson.title}
+                  </h3>
                 </div>
-                <div className="text-purple-400 group-hover:text-purple-600 group-hover:translate-x-1 transition">→</div>
-              </button>
-            ))}
-          </div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
   // ===== SCREEN 3: LESSON CONTENT =====
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-4xl mx-auto">
         <button
-          onClick={() => setScreen('lessons')}
+          onClick={backToLessons}
           className="flex items-center gap-2 text-purple-600 font-semibold mb-6 hover:gap-3 transition"
         >
           <ArrowLeft size={20} /> Back to {selectedLevel?.title}
@@ -200,7 +223,7 @@ export default function GermanApp() {
   )
 }
 
-// ===== LESSON RENDERER - SAME AS YOURS =====
+// ===== LESSON RENDERER =====
 function LessonRenderer({ content, title, onComplete }: any) {
   const [parsedContent, setParsedContent] = useState<any>({ missions: [] })
   const [m, setM] = useState(0)
