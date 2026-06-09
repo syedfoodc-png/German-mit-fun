@@ -48,27 +48,39 @@ export default function QuizPage() {
     setLoading(false)
   }
 
-  async function saveProgress(finalScore: number) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+  
+async function saveProgress(finalScore: number) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-    if (!user) return
+  if (!user) return
 
-    const { data, error } = await supabase
-      .from('user_progress')
-      .insert([
-        {
-          user_id: user.id,
-          lesson_id: Number(lessonid),
-          score: finalScore,
-          completed: true,
-        },
-      ])
+  const percentage = Math.round(
+    (finalScore / quiz.length) * 100
+  )
 
-    console.log('PROGRESS DATA:', data)
-    console.log('PROGRESS ERROR:', error)
-  }
+  const earnedXP =
+    percentage >= 60
+      ? 50
+      : 10
+
+  const { data, error } = await supabase
+    .from('user_progress')
+    .insert([
+      {
+        user_id: user.id,
+        lesson_id: Number(lessonid),
+        score: finalScore,
+        completed: true,
+        xp: earnedXP,
+      },
+    ])
+
+  console.log('PROGRESS DATA:', data)
+  console.log('PROGRESS ERROR:', error)
+}
+
 
   function selectAnswer(answer: string) {
     if (selectedAnswer) return
@@ -135,7 +147,7 @@ export default function QuizPage() {
           </p>
 
           <p className="text-2xl mb-6">
-            Percentage: {percentage}%
+            XP EARNED:{percentage >= 60 ? 50 :10}
           </p>
 
           {percentage >= 60 ? (
