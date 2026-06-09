@@ -1,14 +1,12 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  // ESLINT WALA HATA DIYA - AB YAHAN NAHI LIKHTE
   experimental: {
-    serverActions: true,
-  }
+    serverActions: {
+      // khaali object chahiye bas
+    }
+  },
 }
 
-module.exports = nextConfig
+export default nextConfig
