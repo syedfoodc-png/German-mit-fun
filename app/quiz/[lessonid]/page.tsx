@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from 'next/link'
@@ -48,39 +47,43 @@ export default function QuizPage() {
     setLoading(false)
   }
 
-  
-async function saveProgress(finalScore: number) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  async function saveProgress(finalScore: number) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (!user) return
+    if (!user) return
 
-  const percentage = Math.round(
-    (finalScore / quiz.length) * 100
-  )
+    const percentage = Math.round(
+      (finalScore / quiz.length) * 100
+    )
 
-  const earnedXP =
-    percentage >= 60
-      ? 50
-      : 10
+    const earnedXP =
+      percentage >= 60
+        ? 50
+        : 10
 
-  const { data, error } = await supabase
-    .from('user_progress')
-    .insert([
-      {
-        user_id: user.id,
-        lesson_id: Number(lessonid),
-        score: finalScore,
-        completed: true,
-        xp: earnedXP,
-      },
-    ])
+    const today = new Date()
+      .toISOString()
+      .split('T')[0]
 
-  console.log('PROGRESS DATA:', data)
-  console.log('PROGRESS ERROR:', error)
-}
+    const { data, error } = await supabase
+      .from('user_progress')
+      .insert([
+        {
+          user_id: user.id,
+          lesson_id: Number(lessonid),
+          score: finalScore,
+          completed: true,
+          xp: earnedXP,
+          streak: 1,
+          last_activity: today,
+        },
+      ])
 
+    console.log('PROGRESS DATA:', data)
+    console.log('PROGRESS ERROR:', error)
+  }
 
   function selectAnswer(answer: string) {
     if (selectedAnswer) return
@@ -99,11 +102,7 @@ async function saveProgress(finalScore: number) {
       setCurrentQuestion((prev) => prev + 1)
       setSelectedAnswer(null)
     } else {
-      const finalScore =
-        selectedAnswer ===
-        quiz[currentQuestion].correct_answer
-          ? score
-          : score
+      const finalScore = score
 
       await saveProgress(finalScore)
       setFinished(true)
@@ -135,9 +134,15 @@ async function saveProgress(finalScore: number) {
       (score / quiz.length) * 100
     )
 
+    const earnedXP =
+      percentage >= 60
+        ? 50
+        : 10
+
     return (
       <main className="min-h-screen bg-slate-100 p-10">
         <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow">
+
           <h1 className="text-5xl font-bold mb-6">
             Quiz Completed 🎉
           </h1>
@@ -146,8 +151,12 @@ async function saveProgress(finalScore: number) {
             Score: {score} / {quiz.length}
           </p>
 
-          <p className="text-2xl mb-6">
-            XP EARNED:{percentage >= 60 ? 50 :10}
+          <p className="text-2xl mb-4">
+            Percentage: {percentage}%
+          </p>
+
+          <p className="text-2xl mb-6 text-green-600 font-bold">
+            XP Earned: +{earnedXP}
           </p>
 
           {percentage >= 60 ? (
@@ -160,12 +169,24 @@ async function saveProgress(finalScore: number) {
             </div>
           )}
 
-          <Link
-            href="/"
-            className="inline-block mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700"
-          >
-            Back To Home
-          </Link>
+          <div className="flex gap-4 mt-8">
+
+            <Link
+              href="/dashboard"
+              className="bg-green-600 text-white px-6 py-3 rounded"
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              href="/"
+              className="bg-blue-600 text-white px-6 py-3 rounded"
+            >
+              Home
+            </Link>
+
+          </div>
+
         </div>
       </main>
     )
@@ -176,13 +197,13 @@ async function saveProgress(finalScore: number) {
   return (
     <main className="min-h-screen bg-slate-100 p-10">
       <div className="max-w-4xl mx-auto">
+
         <h1 className="text-5xl font-bold mb-4">
           Quiz
         </h1>
 
         <p className="text-xl mb-4">
-          Question {currentQuestion + 1} of{' '}
-          {quiz.length}
+          Question {currentQuestion + 1} of {quiz.length}
         </p>
 
         <div className="w-full bg-gray-300 h-4 rounded-full mb-8">
@@ -199,6 +220,7 @@ async function saveProgress(finalScore: number) {
         </div>
 
         <div className="bg-white p-8 rounded-xl shadow">
+
           <h2 className="text-3xl font-bold mb-6">
             {q.question}
           </h2>
@@ -243,15 +265,14 @@ async function saveProgress(finalScore: number) {
               onClick={nextQuestion}
               className="mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700"
             >
-              {currentQuestion + 1 ===
-              quiz.length
+              {currentQuestion + 1 === quiz.length
                 ? 'Finish Quiz'
                 : 'Next Question'}
             </button>
           )}
+
         </div>
       </div>
     </main>
   )
 }
-

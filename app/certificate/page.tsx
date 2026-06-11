@@ -1,3 +1,4 @@
+'use client'
 import Link from "next/link";
 
 export default function CertificatePage() {
@@ -62,13 +63,12 @@ export default function CertificatePage() {
         </p>
 
         <div className="mt-10 flex justify-center gap-4">
-
-          <button
-            onClick={() => window.print()}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg"
-          >
-            Print Certificate
-          </button>
+<a
+  href="#"
+  className="bg-green-600 text-white px-6 py-3 rounded-lg"
+>
+  Print Certificate (Ctrl + P)
+</a>
 
           <Link
             href="/dashboard"
