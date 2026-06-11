@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from 'next/link'
@@ -20,42 +19,49 @@ export default function LevelPage() {
   const [completedLessons, setCompletedLessons] = useState<number[]>([])
   const [loading, setLoading] = useState(true)
 
-useEffect(() => {
-  if (id) {
-    loadData()
-  }
-}, [id])
+  useEffect(() => {
+    if (id) {
+      loadData()
+    }
+  }, [id])
+
   async function loadData() {
-    const { data: lessonsData } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('level_id', Number(id))
-      .order('order')
-
-    setLessons(lessonsData || [])
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (user) {
-      const { data: progress } = await supabase
-        .from('user_progress')
+    try {
+      const { data: lessonsData } = await supabase
+        .from('lessons')
         .select('*')
-        .eq('user_id', user.id)
-        console.log("USER:", user)
+        .eq('level_id', Number(id))
+        .order('order')
 
-  console.log(
-    "COMPLETED:",
-    progress?.map((p) => p.lesson_id)
-  )
+      setLessons(lessonsData || [])
 
-  console.log("LESSONS:", lessonsData)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
+      console.log('USER:', user)
 
-      setCompletedLessons(
-        progress?.map((p) => p.lesson_id) || []
-      )
+      if (user) {
+        const { data: progress } = await supabase
+          .from('user_progress')
+          .select('*')
+          .eq('user_id', user.id)
+
+        console.log(
+          'COMPLETED:',
+          progress?.map((p) => p.lesson_id)
+        )
+
+        console.log('LESSONS:', lessonsData)
+
+        setCompletedLessons(
+          progress?.map((p) => p.lesson_id) || []
+        )
+      } else {
+        console.log('NO USER FOUND')
+      }
+    } catch (error) {
+      console.log('LOAD ERROR:', error)
     }
 
     setLoading(false)
@@ -85,16 +91,23 @@ useEffect(() => {
         Lessons
       </h1>
 
+      {/* DEBUG */}
+      <div className="bg-red-500 text-white p-4 rounded mb-6">
+        Completed Lessons:
+        {JSON.stringify(completedLessons)}
+      </div>
+
       <div className="grid gap-4">
 
         {lessons.map((lesson, index) => {
 
-const unlocked =
-  index === 0 ||
-  completedLessons.includes(lesson.id) ||
-  completedLessons.includes(
-    lessons[index - 1]?.id
-  )
+          const unlocked =
+            index === 0 ||
+            completedLessons.includes(lesson.id) ||
+            completedLessons.includes(
+              lessons[index - 1]?.id
+            )
+
           return unlocked ? (
             <Link
               key={lesson.id}
@@ -116,7 +129,6 @@ const unlocked =
                   ✅ Completed
                 </p>
               )}
-
             </Link>
           ) : (
             <div
@@ -139,4 +151,3 @@ const unlocked =
     </main>
   )
 }
-
