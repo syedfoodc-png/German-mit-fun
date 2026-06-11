@@ -7,6 +7,10 @@ export default async function Dashboard() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  const { data: badges } = await supabase
+    .from("achievements")
+    .select("*");
+
   const totalLessons = data?.length || 0;
 
   const totalXP =
@@ -15,36 +19,39 @@ export default async function Dashboard() {
       0
     ) || 0;
 
-  const currentStreak =
-    data?.[0]?.streak || 0;
-
   const progress = Math.min(
     Math.round((totalLessons / 70) * 100),
     100
   );
 
+  const currentStreak =
+    data?.[0]?.streak || 0;
+
+  const level =
+    Math.floor(totalXP / 100) + 1;
+
   const rank =
-    totalXP >= 3000
-      ? "👑 Legend"
-      : totalXP >= 2000
+    totalXP >= 5000
+      ? "👑 Grand Master"
+      : totalXP >= 2500
       ? "🏆 Master"
       : totalXP >= 1000
       ? "⭐ Advanced"
       : totalXP >= 500
-      ? "🚀 Intermediate"
-      : "🌱 Beginner";
+      ? "🔥 Intermediate"
+      : "🚀 Beginner";
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100 p-10">
 
-      <h1 className="text-6xl font-extrabold text-center mb-10 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        Dashboard 🚀
+      <h1 className="text-6xl font-extrabold mb-10">
+        Dashboard
       </h1>
 
       <div className="grid md:grid-cols-4 gap-6 mb-10">
 
-        <div className="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
-          <h2 className="text-xl font-semibold">
+        <div className="bg-gradient-to-r from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-xl">
+          <h2 className="text-xl">
             📚 Lessons
           </h2>
 
@@ -53,9 +60,9 @@ export default async function Dashboard() {
           </p>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-xl">
-          <h2 className="text-xl font-semibold">
-            ⭐ Total XP
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-700 text-white p-6 rounded-2xl shadow-xl">
+          <h2 className="text-xl">
+            ⚡ Total XP
           </h2>
 
           <p className="text-5xl font-bold mt-3">
@@ -63,9 +70,9 @@ export default async function Dashboard() {
           </p>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-xl">
-          <h2 className="text-xl font-semibold">
-            🔥 Streak
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white p-6 rounded-2xl shadow-xl">
+          <h2 className="text-xl">
+            🔥 Daily Streak
           </h2>
 
           <p className="text-5xl font-bold mt-3">
@@ -73,82 +80,70 @@ export default async function Dashboard() {
           </p>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-2xl shadow-xl">
-          <h2 className="text-xl font-semibold">
-            🏆 Rank
+        <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-6 rounded-2xl shadow-xl">
+          <h2 className="text-xl">
+            🆙 Level
           </h2>
 
-          <p className="text-3xl font-bold mt-4">
-            {rank}
+          <p className="text-5xl font-bold mt-3">
+            {level}
           </p>
         </div>
 
       </div>
 
       <div className="bg-white p-8 rounded-2xl shadow-xl mb-10">
-
-        <h2 className="text-3xl font-bold mb-6">
-          📈 Overall Progress
+        <h2 className="text-3xl font-bold mb-4">
+          🎯 Overall Progress
         </h2>
 
-        <div className="w-full bg-gray-200 h-8 rounded-full overflow-hidden">
+        <div className="w-full bg-gray-300 h-6 rounded-full overflow-hidden">
           <div
-            className="bg-gradient-to-r from-green-400 to-green-600 h-8 rounded-full transition-all duration-700"
+            className="bg-gradient-to-r from-green-400 to-green-600 h-6 rounded-full transition-all duration-700"
             style={{
               width: `${progress}%`,
             }}
           />
         </div>
 
-        <div className="flex justify-between mt-4">
-          <p className="font-semibold text-lg">
-            {progress}% Complete
-          </p>
-
-          <p className="text-gray-600">
-            {totalLessons} / 70 Lessons
-          </p>
-        </div>
-
+        <p className="mt-4 text-xl font-bold">
+          {progress}% Complete
+        </p>
       </div>
 
-      <div className="bg-white p-8 rounded-2xl shadow-xl border-l-8 border-blue-500 mb-10">
-
-        <h2 className="text-3xl font-bold mb-6">
-          ⚡ Recent Activity
+      <div className="bg-white p-8 rounded-2xl shadow-xl mb-10">
+        <h2 className="text-3xl font-bold mb-4">
+          🏅 Current Rank
         </h2>
 
-        {data && data.length > 0 ? (
-          data.slice(0, 5).map((item) => (
+        <p className="text-4xl font-bold">
+          {rank}
+        </p>
+      </div>
+
+      <div className="bg-white p-8 rounded-2xl shadow-xl mb-10">
+        <h2 className="text-3xl font-bold mb-6">
+          📈 Recent Activity
+        </h2>
+
+        {data?.length ? (
+          data.slice(0, 10).map((item) => (
             <div
               key={item.id}
               className="border-b py-4"
             >
-              <div className="flex justify-between">
-
-                <div>
-                  <p className="font-bold text-lg">
-                    Lesson {item.lesson_id}
-                  </p>
-
-                  <p className="text-gray-500">
-                    Score: {item.score}
-                  </p>
-                </div>
-
-                <div className="text-green-600 font-bold text-xl">
-                  +{item.xp || 0} XP
-                </div>
-
-              </div>
+              Lesson {item.lesson_id}
+              {" • "}
+              Score {item.score}
+              {" • "}
+              XP +{item.xp || 0}
             </div>
           ))
         ) : (
-          <p className="text-gray-500">
-            No activity yet.
+          <p>
+            No activity yet
           </p>
         )}
-
       </div>
 
       <div className="bg-white p-8 rounded-2xl shadow-xl mb-10">
@@ -157,35 +152,50 @@ export default async function Dashboard() {
           🏅 Achievements
         </h2>
 
-        <div className="grid md:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
 
-          <div className="bg-yellow-100 p-4 rounded-xl text-center">
-            🥇
-            <p className="font-bold mt-2">
-              First Lesson
-            </p>
-          </div>
+          {badges?.map((badge) => {
 
-          <div className="bg-green-100 p-4 rounded-xl text-center">
-            ⭐
-            <p className="font-bold mt-2">
-              100 XP
-            </p>
-          </div>
+            const unlocked =
+              totalXP >= badge.required_xp
 
-          <div className="bg-red-100 p-4 rounded-xl text-center">
-            🔥
-            <p className="font-bold mt-2">
-              Daily Streak
-            </p>
-          </div>
+            return (
+              <div
+                key={badge.id}
+                className={`p-5 rounded-xl border-2 transition ${
+                  unlocked
+                    ? "bg-green-50 border-green-500"
+                    : "bg-gray-100 border-gray-300 opacity-60"
+                }`}
+              >
+                <div className="text-5xl">
+                  {badge.icon}
+                </div>
 
-          <div className="bg-purple-100 p-4 rounded-xl text-center">
-            🏆
-            <p className="font-bold mt-2">
-              Quiz Master
-            </p>
-          </div>
+                <h3 className="font-bold text-xl mt-3">
+                  {badge.title}
+                </h3>
+
+                <p className="text-sm mt-2 text-gray-600">
+                  {badge.description}
+                </p>
+
+                <p className="mt-2 font-semibold">
+                  Required XP: {badge.required_xp}
+                </p>
+
+                {unlocked ? (
+                  <p className="mt-3 text-green-600 font-bold">
+                    ✅ Unlocked
+                  </p>
+                ) : (
+                  <p className="mt-3 text-gray-500">
+                    🔒 Locked
+                  </p>
+                )}
+              </div>
+            );
+          })}
 
         </div>
 
@@ -195,31 +205,19 @@ export default async function Dashboard() {
 
         <Link
           href="/"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl"
         >
           🏠 Home
         </Link>
 
-        <Link
-          href="/certificate"
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold"
-        >
-          🏆 Certificate
-        </Link>
-
-        <Link
-          href="/language/de"
-          className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-xl font-semibold"
-        >
-          🇩🇪 German
-        </Link>
-
-        <Link
-          href="/language/ar"
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold"
-        >
-          🇸🇦 Arabic
-        </Link>
+        {progress >= 100 && (
+          <Link
+            href="/certificate"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
+          >
+            🏆 Certificate
+          </Link>
+        )}
 
       </div>
 
