@@ -10,6 +10,14 @@ export default async function Dashboard() {
   const { data: badges } = await supabase
     .from("achievements")
     .select("*");
+    
+const { data: challenge } = await supabase
+  .from("daily_challenges")
+  .select("*")
+  .order("id", { ascending: false })
+  .limit(1)
+  .single();
+
 
   const totalLessons = data?.length || 0;
 
@@ -110,6 +118,28 @@ export default async function Dashboard() {
           {progress}% Complete
         </p>
       </div>
+      
+<div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-8 rounded-2xl shadow-xl mb-10">
+
+  <h2 className="text-3xl font-bold mb-3">
+    🔥 Daily Challenge
+  </h2>
+
+  <h3 className="text-2xl font-bold">
+    {challenge?.title}
+  </h3>
+
+  <p className="mt-2">
+    {challenge?.description}
+  </p>
+
+  <div className="mt-4 text-xl font-bold">
+    Reward: ⚡ {challenge?.xp_reward} XP
+  </div>
+
+</div>
+
+
 
       <div className="bg-white p-8 rounded-2xl shadow-xl mb-10">
         <h2 className="text-3xl font-bold mb-4">
@@ -201,25 +231,34 @@ export default async function Dashboard() {
 
       </div>
 
-      <div className="flex flex-wrap gap-4">
 
-        <Link
-          href="/"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl"
-        >
-          🏠 Home
-        </Link>
+<div className="flex flex-wrap gap-4">
 
-        {progress >= 100 && (
-          <Link
-            href="/certificate"
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
-          >
-            🏆 Certificate
-          </Link>
-        )}
+  <Link
+    href="/"
+    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl"
+  >
+    🏠 Home
+  </Link>
 
-      </div>
+  <Link
+    href="/leaderboard"
+    className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-xl"
+  >
+    🏆 Leaderboard
+  </Link>
+
+  {progress >= 100 && (
+    <Link
+      href="/certificate"
+      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
+    >
+      🏆 Certificate
+    </Link>
+  )}
+
+</div>
+
 
     </main>
   );

@@ -20,10 +20,11 @@ export default function LevelPage() {
   const [completedLessons, setCompletedLessons] = useState<number[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+useEffect(() => {
+  if (id) {
     loadData()
-  }, [])
-
+  }
+}, [id])
   async function loadData() {
     const { data: lessonsData } = await supabase
       .from('lessons')
@@ -79,12 +80,12 @@ export default function LevelPage() {
 
         {lessons.map((lesson, index) => {
 
-          const unlocked =
-            index === 0 ||
-            completedLessons.includes(
-              lessons[index - 1]?.id
-            )
-
+const unlocked =
+  index === 0 ||
+  completedLessons.includes(lesson.id) ||
+  completedLessons.includes(
+    lessons[index - 1]?.id
+  )
           return unlocked ? (
             <Link
               key={lesson.id}
