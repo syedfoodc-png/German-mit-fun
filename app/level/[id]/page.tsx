@@ -43,6 +43,15 @@ useEffect(() => {
         .from('user_progress')
         .select('*')
         .eq('user_id', user.id)
+        console.log("USER:", user)
+
+  console.log(
+    "COMPLETED:",
+    progress?.map((p) => p.lesson_id)
+  )
+
+  console.log("LESSONS:", lessonsData)
+
 
       setCompletedLessons(
         progress?.map((p) => p.lesson_id) || []
